@@ -1,5 +1,5 @@
 import unittest
-import serilizer
+import serializer
 import datetime
 
 
@@ -7,8 +7,8 @@ class SerializerTestCase(unittest.TestCase):
 
     def test_check_string_field(self):
 
-        class TestModel(serilizer.BaseSerializer):
-            name = serilizer.String(length=5)
+        class TestModel(serializer.BaseSerializer):
+            name = serializer.String(length=5)
 
         test_string = "hello"
 
@@ -21,8 +21,8 @@ class SerializerTestCase(unittest.TestCase):
 
     def test_check_empty_integers(self):
 
-        class TestModel(serilizer.BaseSerializer):
-            number = serilizer.Int32()
+        class TestModel(serializer.BaseSerializer):
+            number = serializer.Int32()
 
         tm = TestModel()
 
@@ -30,8 +30,8 @@ class SerializerTestCase(unittest.TestCase):
         self.assertEqual(tm.number, 0)
 
     def test_check_empty_floats(self):
-        class TestModel(serilizer.BaseSerializer):
-            number = serilizer.Float32()
+        class TestModel(serializer.BaseSerializer):
+            number = serializer.Float32()
 
         tm = TestModel()
 
@@ -39,8 +39,8 @@ class SerializerTestCase(unittest.TestCase):
         self.assertEqual(tm.number, 0)
 
     def test_check_bool(self):
-        class TestModel(serilizer.BaseSerializer):
-            flag = serilizer.Bool()
+        class TestModel(serializer.BaseSerializer):
+            flag = serializer.Bool()
 
         tm = TestModel()
 
@@ -49,8 +49,8 @@ class SerializerTestCase(unittest.TestCase):
 
     def test_datetime_field(self):
 
-        class TestModel(serilizer.BaseSerializer):
-            dt = serilizer.Datetime()
+        class TestModel(serializer.BaseSerializer):
+            dt = serializer.Datetime()
 
         expected = datetime.datetime.now()
         test_obj = TestModel()
@@ -61,8 +61,8 @@ class SerializerTestCase(unittest.TestCase):
 
     def test_datetime_empty_buffer(self):
 
-        class TestModel(serilizer.BaseSerializer):
-            dt = serilizer.Datetime()
+        class TestModel(serializer.BaseSerializer):
+            dt = serializer.Datetime()
 
         expected = datetime.datetime(1970, 1, 1, 4, 0)
         ob = TestModel()
@@ -75,25 +75,25 @@ class ListSerializerTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
 
-        class TestObject(serilizer.BaseSerializer):
-            a = serilizer.Int32()
-            b = serilizer.Int32()
+        class TestObject(serializer.BaseSerializer):
+            a = serializer.Int32()
+            b = serializer.Int32()
 
         self.model_class = TestObject
         self.size = 2
         self.buffer = memoryview(bytearray((255, 0, 0, 0, 100, 0, 0, 0) * self.size))
 
     def test_correct_size(self):
-        l = serilizer.ListSerializer(self.model_class, self.buffer)
+        l = serializer.ListSerializer(self.model_class, self.buffer)
         self.assertEqual(len(l), self.size)
 
     def test_check_objects(self):
-        l = serilizer.ListSerializer(self.model_class, self.buffer)
+        l = serializer.ListSerializer(self.model_class, self.buffer)
         for i in l:
             self.assertEqual(i.a, 255)
             self.assertEqual(i.b, 100)
 
     def test_wrong_buffer(self):
         buff = memoryview(bytearray([]))
-        l = serilizer.ListSerializer(self.model_class, buff)
+        l = serializer.ListSerializer(self.model_class, buff)
         self.assertEqual(len(l), 0)

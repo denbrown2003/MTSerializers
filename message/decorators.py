@@ -1,4 +1,4 @@
-from serilizer.base import BaseSerializer
+from serializer.base import BaseSerializer
 
 
 def message_decorator(message_code: int, message_serializer: BaseSerializer):

@@ -1,19 +1,19 @@
-import serilizer
+import serializer
 
 
-class CommandEvent(serilizer.BaseSerializer):
+class CommandEvent(serializer.BaseSerializer):
 
-    code: int = serilizer.Int32()
-    balance: float = serilizer.Float32()
-    status: int = serilizer.Int32()
-    name: str = serilizer.String(length=10)
-    flag: bool = serilizer.Bool()
+    code: int = serializer.Int32()
+    balance: float = serializer.Float32()
+    status: int = serializer.Int32()
+    name: str = serializer.String(length=10)
+    flag: bool = serializer.Bool()
 
 
-class Account(serilizer.BaseSerializer):
+class Account(serializer.BaseSerializer):
 
-    account: int = serilizer.UInt32()
-    balance: float = serilizer.Float32()
+    account: int = serializer.UInt32()
+    balance: float = serializer.Float32()
 
 
 def main():

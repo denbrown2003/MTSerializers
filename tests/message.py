@@ -1,6 +1,6 @@
 from typing import Type
 import unittest
-import serilizer
+import serializer
 import message
 
 
@@ -11,8 +11,8 @@ class MessageTestCase(unittest.TestCase):
 
     def test_dispatcher_callback_wrapper(self):
 
-        class TestModel(serilizer.BaseSerializer):
-            status = serilizer.Int32()
+        class TestModel(serializer.BaseSerializer):
+            status = serializer.Int32()
 
         @self.dispatcher.callback(message_code=99)
         def test_func(data: Type[TestModel]) -> TestModel:
@@ -23,11 +23,11 @@ class MessageTestCase(unittest.TestCase):
 
     def test_dispatcher_wrapper_callbacks_mapper(self):
 
-        class TestModel(serilizer.BaseSerializer):
-            status = serilizer.String(length=5)
+        class TestModel(serializer.BaseSerializer):
+            status = serializer.String(length=5)
 
-        class TestModel2(serilizer.BaseSerializer):
-            code = serilizer.Int32()
+        class TestModel2(serializer.BaseSerializer):
+            code = serializer.Int32()
 
         @self.dispatcher.callback(message_code=1)
         def test_func(data: Type[TestModel]) -> TestModel:
