@@ -19,33 +19,35 @@ class SerializerMeta(type):
         :param dct:
         """
         x = super().__new__(mcs, name, bases, dct)
-        full_size = 0
+        format_size = 0
         format_ = "<"
 
         if bases:
             for k, i in  dct.items():
                 if isinstance(i, BaseDescriptor):
-                    offset = i.offset if i.offset is not None else full_size
+                    offset = i.offset if i.offset is not None else format_size
                     size_ = struct.calcsize(i.format) + offset
 
-                    if size_ < full_size:
+                    if size_ < format_size:
                         raise SyntaxError("Wrong offset")
 
-                    if full_size != offset:               # If schema has a paddings -> we make it
-                        pad_size = i.offset - full_size
+                    if format_size != offset:               # If schema has a paddings -> we make it
+                        pad_size = i.offset - format_size
                         format_ += f"{pad_size}x{i.format}"
                     else:
                         format_ += i.format
 
-                    full_size = size_
+                    format_size = size_
                     i.offset = offset
 
-        x.full_size = full_size
+        x.format_size = format_size
         x.format = format_
         return x
 
 
 class BaseSerializer(metaclass=SerializerMeta):
+
+    size = None
 
     def __init__(self, byte_data: Optional[Union[bytearray, memoryview]] = None):
 
@@ -53,7 +55,7 @@ class BaseSerializer(metaclass=SerializerMeta):
             byte_data = memoryview(byte_data)
 
         elif byte_data is None:
-            byte_data = memoryview(bytearray(b"\x00" * self.full_size))
+            byte_data = memoryview(bytearray(b"\x00" * self.format_size))
 
         self._byte_data: memoryview = byte_data
 

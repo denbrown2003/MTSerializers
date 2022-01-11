@@ -24,6 +24,7 @@ class MessageTestCase(unittest.TestCase):
     def test_dispatcher_wrapper_callbacks_mapper(self):
 
         class TestModel(serializer.BaseSerializer):
+            size = 7
             status = serializer.String(length=5)
 
         class TestModel2(serializer.BaseSerializer):
@@ -55,8 +56,9 @@ class MessageTestCase(unittest.TestCase):
         self.assertEqual(response1.status, "Hello")
         self.assertEqual(response2.code, 255)
 
-        payload3 = b"Hello"*3
+        payload3 = b"Helloff"*3
         response1 = self.dispatcher.invoke(3, payload3)
+        print(response1.get_objects())
 
     def test_async_invoker(self):
 
