@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='mt4_utils',
-    version="0.0.32",
+    version="0.0.33",
     url='',
     license='',
     author='Arthur',
