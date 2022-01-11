@@ -1,3 +1,4 @@
+import asyncio
 from typing import Type
 import unittest
 from src.mt4_utils import serializer, message
@@ -47,3 +48,21 @@ class MessageTestCase(unittest.TestCase):
 
         self.assertEqual(response1.status, "Hello")
         self.assertEqual(response2.code, 255)
+
+    def test_async_invoker(self):
+
+        class TestModel(serializer.BaseSerializer):
+            status = serializer.String(length=5)
+
+        @self.dispatcher.callback(message_code=1)
+        async def test_func(data: Type[TestModel]) -> TestModel:
+            return data
+
+        async def async_task():
+            response1 = await self.dispatcher.async_invoke(1, payload1)
+            self.assertIsInstance(response1, TestModel)
+            self.assertEqual(response1.status, "Hello")
+
+        payload1 = b"Hello"
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(async_task())

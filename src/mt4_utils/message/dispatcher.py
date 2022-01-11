@@ -16,6 +16,16 @@ class Dispatcher:
         data = message_serializer(byte_data=binary_data)
         return f(data)
 
+    async def async_invoke(self, message_code: int, payload: Union[memoryview, bytearray, bytes]):
+        callback = self.__callbacks.get(message_code)
+        if callback:
+            return await self._async_invoker(callback, payload)
+
+    async def _async_invoker(self, f, binary_data):
+        message_serializer = f.__annotations__['data'].__args__[0]
+        data = message_serializer(byte_data=binary_data)
+        return await f(data)
+
     def callback(self, message_code: int):
         """
             Callbacks register
