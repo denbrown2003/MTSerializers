@@ -1,7 +1,6 @@
 from typing import Type
 import unittest
-import serializer
-import message
+from src.mt4_utils import serializer, message
 
 
 class MessageTestCase(unittest.TestCase):

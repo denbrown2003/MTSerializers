@@ -1,5 +1,5 @@
 import unittest
-import serializer
+from src.mt4_utils import serializer
 import datetime
 
 

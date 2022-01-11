@@ -1,12 +1,13 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='mt4_utils',
-    version="0.0.1",
-    packages=['message', 'serializer'],
+    version="0.0.32",
     url='',
     license='',
-    author='user',
+    author='Arthur',
     author_email='',
-    description=''
+    description='',
+    package_dir={"": "src"},
+    packages=find_packages(where="src"),
 )
