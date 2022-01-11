@@ -1,16 +1,18 @@
-from typing import Type
+from typing import Type, TypeVar, Generic
 from .base import BaseSerializer
 
 __all__ = [
     'ListSerializer'
 ]
 
+T = TypeVar('T')
 
-class ListSerializer:
+
+class ListSerializer(Generic[T]):
 
     __slots__ = "model", "buffer", "model_size"
 
-    def __init__(self, model: Type[BaseSerializer], buffer: memoryview):
+    def __init__(self, model: T, buffer: memoryview):
         self.model = model
         self.buffer = buffer
 

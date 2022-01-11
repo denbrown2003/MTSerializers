@@ -15,7 +15,7 @@ class MessageTestCase(unittest.TestCase):
             status = serializer.Int32()
 
         @self.dispatcher.callback(message_code=99)
-        def test_func(data: Type[TestModel]) -> TestModel:
+        def test_func(data: TestModel) -> TestModel:
             return data
 
         callback = self.dispatcher._Dispatcher__callbacks[99]
@@ -30,11 +30,17 @@ class MessageTestCase(unittest.TestCase):
             code = serializer.Int32()
 
         @self.dispatcher.callback(message_code=1)
-        def test_func(data: Type[TestModel]) -> TestModel:
+        def test_func(data: TestModel) -> TestModel:
+            self.assertEqual(data.status, "Hello")
+            return data
+
+        @self.dispatcher.callback(message_code=3)
+        def test_func3(data: serializer.ListSerializer[TestModel]) -> serializer.ListSerializer[TestModel]:
+            print(data)
             return data
 
         @self.dispatcher.callback(message_code=2)
-        def test_func2(data: Type[TestModel2]) -> TestModel2:
+        def test_func2(data: TestModel2) -> TestModel2:
             return data
 
         payload1 = b"Hello"
@@ -49,13 +55,16 @@ class MessageTestCase(unittest.TestCase):
         self.assertEqual(response1.status, "Hello")
         self.assertEqual(response2.code, 255)
 
+        payload3 = b"Hello"*3
+        response1 = self.dispatcher.invoke(3, payload3)
+
     def test_async_invoker(self):
 
         class TestModel(serializer.BaseSerializer):
             status = serializer.String(length=5)
 
         @self.dispatcher.callback(message_code=1)
-        async def test_func(data: Type[TestModel]) -> TestModel:
+        async def test_func(data: TestModel) -> TestModel:
             return data
 
         async def async_task():

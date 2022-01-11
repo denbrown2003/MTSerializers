@@ -97,3 +97,4 @@ class ListSerializerTestCase(unittest.TestCase):
         buff = memoryview(bytearray([]))
         l = serializer.ListSerializer(self.model_class, buff)
         self.assertEqual(len(l), 0)
+
