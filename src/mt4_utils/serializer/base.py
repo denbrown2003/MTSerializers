@@ -1,8 +1,6 @@
-import collections
-from functools import lru_cache
-import struct
 from typing import Optional, Union
-
+import struct
+import collections
 from .dersciptor import BaseDescriptor
 
 
@@ -61,17 +59,9 @@ class BaseSerializer(metaclass=SerializerMeta):
 
         self._byte_data: memoryview = byte_data
 
-        self.get_data = lru_cache(maxsize=None)(self._get_data)     # fix for gc
-
-    def _get_data(self) -> collections.namedtuple:
-        """
-            To access to cache use get_data method
-        :return:
-        """
+    def get_data(self):
         tup = collections.namedtuple(self.__class__.__name__, self.names)
-        buffer = self._byte_data[:self.format_size]
-        return tup._make(struct.unpack(getattr(self, "format"), buffer))
+        return tup._make(struct.unpack(getattr(self, "format"), self._byte_data))
 
     def get_bytes(self) -> memoryview:
-        buffer = self._byte_data[:self.format_size]
-        return memoryview(buffer)
+        return memoryview(self._byte_data)
