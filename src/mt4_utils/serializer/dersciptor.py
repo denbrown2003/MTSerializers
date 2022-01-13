@@ -1,5 +1,6 @@
-import struct
 from abc import ABC
+from functools import lru_cache
+import struct
 
 
 __all__ = [
@@ -24,6 +25,7 @@ class BaseDescriptor(ABC):
         """
         self.offset = offset
 
+    @lru_cache(maxsize=10)
     def __get__(self, instance, owner):
         value, = struct.unpack_from(self.format, instance._byte_data, self.offset)
         return value

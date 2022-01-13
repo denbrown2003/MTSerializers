@@ -37,7 +37,6 @@ class MessageTestCase(unittest.TestCase):
 
         @self.dispatcher.callback(message_code=3)
         def test_func3(data: serializer.ListSerializer[TestModel]) -> serializer.ListSerializer[TestModel]:
-            print(data)
             return data
 
         @self.dispatcher.callback(message_code=2)
@@ -58,7 +57,7 @@ class MessageTestCase(unittest.TestCase):
 
         payload3 = b"Helloff"*3
         response1 = self.dispatcher.invoke(3, payload3)
-        print(response1.get_objects())
+        response1.get_objects()
 
     def test_async_invoker(self):
 
