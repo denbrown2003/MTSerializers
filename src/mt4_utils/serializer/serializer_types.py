@@ -1,4 +1,5 @@
 import datetime
+from typing import Union, Type
 from .dersciptor import BaseDescriptor, SequentialDescriptor
 
 __all__ = [
@@ -75,18 +76,27 @@ class String(SequentialDescriptor):
         super().__set__(instance, value.encode())
 
 
-class Datetime(UInt64):
+TimestampType = Union[Type[UInt32], Type[UInt64]]
 
-    normalizer = 1000000
+
+class Datetime(BaseDescriptor):
+
+    def __init__(self, *, data_type: TimestampType = UInt64, offset: int = None):
+        """
+            Some doc
+        :param offset:
+        """
+        super().__init__(offset=offset)
+        self.format = data_type.format
 
     def __get__(self, instance, owner):
-        timestamp = super().__get__(instance, owner) / self.normalizer
+        timestamp = super().__get__(instance, owner)
         dt = datetime.datetime.fromtimestamp(timestamp)
         return dt
 
     def __set__(self, instance, value):
         if isinstance(value, datetime.datetime):
-            super().__set__(instance, int(value.timestamp() * self.normalizer))
+            super().__set__(instance, int(value.timestamp()))
         elif isinstance(value, int):
             super().__set__(instance, value)
         else:

@@ -1,3 +1,4 @@
+import time
 import unittest
 from src.mt4_utils import serializer
 import datetime
@@ -69,6 +70,22 @@ class SerializerTestCase(unittest.TestCase):
 
         self.assertIsInstance(ob.dt, datetime.datetime)
         self.assertEqual(ob.dt, expected)
+
+    def test_different_formats_datetime(self):
+
+        class Test(serializer.BaseSerializer):
+            time1 = serializer.Datetime()
+            time2 = serializer.Datetime(data_type=serializer.UInt32)
+
+        n = datetime.datetime.fromtimestamp(int(time.time()))
+        t = Test()
+        t.time1 = n
+        t.time2 = n
+
+        self.assertEqual(t.time1, n)
+        self.assertEqual(t.time2, n)
+
+
 
 
 class ListSerializerTestCase(unittest.TestCase):
