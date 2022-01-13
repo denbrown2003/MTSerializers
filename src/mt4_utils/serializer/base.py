@@ -69,7 +69,9 @@ class BaseSerializer(metaclass=SerializerMeta):
         :return:
         """
         tup = collections.namedtuple(self.__class__.__name__, self.names)
-        return tup._make(struct.unpack(getattr(self, "format"), self._byte_data))
+        buffer = self._byte_data[:self.format_size]
+        return tup._make(struct.unpack(getattr(self, "format"), buffer))
 
     def get_bytes(self) -> memoryview:
-        return memoryview(self._byte_data)
+        buffer = self._byte_data[:self.format_size]
+        return memoryview(buffer)

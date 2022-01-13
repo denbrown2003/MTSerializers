@@ -53,7 +53,7 @@ class SerializerTestCase(unittest.TestCase):
         class TestModel(serializer.BaseSerializer):
             dt = serializer.Datetime()
 
-        expected = datetime.datetime.now()
+        expected = datetime.datetime.fromtimestamp(int(time.time()))
         test_obj = TestModel()
         test_obj.dt = expected
 
