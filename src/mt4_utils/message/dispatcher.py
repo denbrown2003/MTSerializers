@@ -1,21 +1,36 @@
+from abc import ABC, abstractmethod
 import typing
-from typing import Union, Dict, Callable
+from typing import Union, Dict, Any
 from weakref import WeakValueDictionary
-from ..serializer import ListSerializer, BaseSerializer
+from ..serializer import BaseSerializer
 
 
-class Dispatcher:
+class Base(ABC):
 
-    __callbacks = WeakValueDictionary()
+    _callbacks = WeakValueDictionary()
 
-    def invoke(self, message_code: int, payload: Union[memoryview, bytearray, bytes]):
-        callback = self.__callbacks.get(message_code)
-        if callback:
-            return self._invoker(callback, payload)
+    def callback(self, message_code: int):
+        """
+            Callbacks register
+            Example of callback
 
-    def convert_data(self, f, binary_data):
+            @dispatcher.callback(message_code=3)
+            async def account_handler(data: Account, account_id: Optional[int]) -> None:
+                print(data.holder)
 
-        message_serializer = f.__annotations__['data']
+            data - User defined serializer class
+
+        :param message_code: Code of message from message headers
+        :return:
+        """
+        def wrapper(f):
+            def inner_wrapper(*args, **kwargs):
+                return f(*args, **kwargs)
+            self.__class__._callbacks[message_code] = f
+            return inner_wrapper
+        return wrapper
+
+    def parse_binary_data(self, message_serializer, binary_data):
 
         if isinstance(message_serializer, typing._GenericAlias):
             model = message_serializer.__args__[0]
@@ -27,26 +42,51 @@ class Dispatcher:
 
         return data
 
-    def _invoker(self, f, binary_data):
-        return f(self.convert_data(f, binary_data))
+    def parse_arguments(self, f, **kwargs) -> Dict[str, Any]:
+        parameters = dict()
 
-    async def async_invoke(self, message_code: int, payload: Union[memoryview, bytearray, bytes]):
-        callback = self.__callbacks.get(message_code)
+        message_serializer = f.__annotations__['data']
+        parameters['data'] = self.parse_binary_data(message_serializer, kwargs['binary_data'])
+
+        if 'account_id' in f.__annotations__:
+            parameters['account_id'] = kwargs.get('account_id')
+
+        return parameters
+
+    @abstractmethod
+    def invoke(
+            self,
+            message_code: int,
+            payload: Union[memoryview, bytearray, bytes],
+            *,
+            account_id: int = None
+    ):
+        ...
+
+
+class Dispatcher(Base):
+
+    def invoke(
+            self,
+            message_code: int,
+            payload: Union[memoryview, bytearray, bytes],
+            *,
+            account_id: int = None
+    ):
+        callback = self._callbacks.get(message_code)
         if callback:
-            return await self._async_invoker(callback, payload)
+            return callback(**self.parse_arguments(callback, binary_data=payload, account_id=account_id))
 
-    async def _async_invoker(self, f, binary_data):
-        return await f(self.convert_data(f, binary_data))
 
-    def callback(self, message_code: int):
-        """
-            Callbacks register
-        :param message_code:
-        :return:
-        """
-        def wrapper(f):
-            def inner_wrapper(*args, **kwargs):
-                return f(*args, **kwargs)
-            self.__class__.__callbacks[message_code] = f
-            return inner_wrapper
-        return wrapper
+class AsyncDispatcher(Base):
+
+    async def invoke(
+            self,
+            message_code: int,
+            payload: Union[memoryview, bytearray, bytes],
+            *,
+            account_id: int = None
+    ):
+        callback = self._callbacks.get(message_code)
+        if callback:
+            return await callback(**self.parse_arguments(callback, binary_data=payload, account_id=account_id))

@@ -8,6 +8,7 @@ class MessageTestCase(unittest.TestCase):
 
     def setUp(self) -> None:
         self.dispatcher = message.Dispatcher()
+        self.async_dispatcher = message.AsyncDispatcher()
 
     def test_dispatcher_callback_wrapper(self):
 
@@ -18,7 +19,7 @@ class MessageTestCase(unittest.TestCase):
         def test_func(data: TestModel) -> TestModel:
             return data
 
-        callback = self.dispatcher._Dispatcher__callbacks[99]
+        callback = self.dispatcher._callbacks[99]
         self.assertIsNotNone(callback)
 
     def test_dispatcher_wrapper_callbacks_mapper(self):
@@ -64,15 +65,42 @@ class MessageTestCase(unittest.TestCase):
         class TestModel(serializer.BaseSerializer):
             status = serializer.String(length=5)
 
-        @self.dispatcher.callback(message_code=1)
+        @self.async_dispatcher.callback(message_code=1)
         async def test_func(data: TestModel) -> TestModel:
             return data
 
         async def async_task():
-            response1 = await self.dispatcher.async_invoke(1, payload1)
+            response1 = await self.dispatcher.invoke(1, payload1)
             self.assertIsInstance(response1, TestModel)
             self.assertEqual(response1.status, "Hello")
 
         payload1 = b"Hello"
         loop = asyncio.get_event_loop()
         loop.run_until_complete(async_task())
+
+    def test_account_in_params(self):
+
+        class Test(serializer.BaseSerializer):
+            code = serializer.Int32()
+
+        @self.dispatcher.callback(message_code=10)
+        def test_func(data: Test, account_id: int):
+            self.assertEqual(data.code, 100)
+            self.assertIsNotNone(account_id)
+            self.assertIsInstance(account_id, int)
+            self.assertEqual(account_id, 10)
+
+        payload = int(100).to_bytes(byteorder="little", signed=True, length=4)
+        self.dispatcher.invoke(10, payload, account_id=10)
+
+    def test_account_in_params_none(self):
+
+        class Test(serializer.BaseSerializer):
+            code = serializer.Int32()
+
+        @self.dispatcher.callback(message_code=10)
+        def test_func(data: Test, account_id: int):
+            self.assertIsNone(account_id)
+
+        payload = int(100).to_bytes(byteorder="little", signed=True, length=4)
+        self.dispatcher.invoke(10, payload)
