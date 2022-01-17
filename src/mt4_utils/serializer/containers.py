@@ -23,7 +23,7 @@ class ListSerializer(Generic[T]):
         for idx, i in enumerate(range(0, len(self.buffer), self.model_full_length)):
             model_buff = self.buffer[i:i + self.model_size]
             model = self.model(model_buff)
-            yield model.get_data()
+            yield model
 
     def get_objects(self):
         return list(self.__iter__())
