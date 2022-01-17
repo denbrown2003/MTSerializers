@@ -1,6 +1,8 @@
-from typing import Optional, Union
-import struct
 import collections
+from functools import lru_cache
+import struct
+from typing import Optional, Union, Dict
+
 from .dersciptor import BaseDescriptor
 
 
@@ -23,7 +25,7 @@ class SerializerMeta(type):
         format_ = "<"
 
         if bases:
-            for k, i in  dct.items():
+            for k, i in dct.items():
                 if isinstance(i, BaseDescriptor):
                     offset = i.offset if i.offset is not None else format_size
                     size_ = struct.calcsize(i.format) + offset
@@ -31,7 +33,7 @@ class SerializerMeta(type):
                     if size_ < format_size:
                         raise SyntaxError("Wrong offset")
 
-                    if format_size != offset:               # If schema has a paddings -> we make it
+                    if format_size != offset:  # If schema has a paddings -> we make it
                         pad_size = i.offset - format_size
                         format_ += f"{pad_size}x{i.format}"
                     else:
@@ -46,7 +48,6 @@ class SerializerMeta(type):
 
 
 class BaseSerializer(metaclass=SerializerMeta):
-
     size = None
 
     def __init__(self, byte_data: Optional[Union[bytearray, memoryview]] = None):
@@ -59,7 +60,9 @@ class BaseSerializer(metaclass=SerializerMeta):
 
         self._byte_data: memoryview = byte_data
 
-    def get_data(self):
+        self.get_dict = lru_cache(maxsize=30)(self._get_dict)   # gc optimization
+
+    def get_data(self) -> collections.namedtuple:
         tup = collections.namedtuple(self.__class__.__name__, self.names)
         buffer = self._byte_data[:self.format_size]
         return tup._make(struct.unpack(getattr(self, "format"), buffer))
@@ -67,3 +70,8 @@ class BaseSerializer(metaclass=SerializerMeta):
     def get_bytes(self) -> memoryview:
         buffer = self._byte_data[:self.format_size]
         return memoryview(buffer)
+
+    def _get_dict(self) -> Dict:
+        return {
+            name: getattr(self, name) for name in self.names.split()
+        }

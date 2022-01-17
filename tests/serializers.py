@@ -85,7 +85,21 @@ class SerializerTestCase(unittest.TestCase):
         self.assertEqual(t.time1, n)
         self.assertEqual(t.time2, n)
 
+    def test_get_dict(self):
 
+        class Test(serializer.BaseSerializer):
+            x = serializer.Int32()
+            y = serializer.Int32()
+
+        o = Test()
+        o.x = 100
+        o.y = 200
+
+        d = o.get_dict()
+
+        self.assertIsInstance(d, dict)
+        self.assertEqual(d.get('x'), 100)
+        self.assertEqual(d.get('y'), 200)
 
 
 class ListSerializerTestCase(unittest.TestCase):
